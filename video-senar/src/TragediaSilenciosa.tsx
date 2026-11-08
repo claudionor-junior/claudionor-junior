@@ -2,6 +2,7 @@ import React from "react";
 import {
   AbsoluteFill,
   Audio,
+  Easing,
   Img,
   Sequence,
   interpolate,
@@ -9,82 +10,118 @@ import {
   staticFile,
   useCurrentFrame,
   useVideoConfig,
-  Easing,
 } from "remotion";
 
 export const FPS = 30;
 const s = (seg: number) => Math.round(seg * FPS);
-
-// Linha do tempo (em segundos), seguindo o roteiro "Tragédia Silenciosa"
-const CENAS = {
-  c1: [0, 6],
-  c2: [6, 12],
-  c3: [12, 18],
-  c4: [18, 26],
-  c5: [26, 34],
-  c6: [34, 40],
-  c7: [40, 46],
-} as const;
 export const DURACAO_TOTAL = s(46);
+const TRANSICAO = 10; // frames de crossfade entre cenas
 
 const COR = {
-  fundo: "#060D0A",
+  fundo: "#050A08",
   verde: "#8DDB2C",
+  verdeEscuro: "#0B1A10",
   azul: "#1F5A8C",
   amarelo: "#FFD400",
-  vermelho: "#FF3B30",
+  vermelho: "#FF453A",
   branco: "#FFFFFF",
 };
 
+const FONTE = "'Inter Display', Inter, sans-serif";
+const ALTURA_IMAGEM = 1320; // área da foto (o resto é o "palco" das legendas)
+
 type Props = { variante: "reels" | "ads"; comNarracao: boolean };
 
-/* ---------- Legendas estilo "Hormozi": palavra por palavra ---------- */
-type Frase = { texto: string; destaque?: Record<string, string>; de: number; ate: number };
+/* =====================================================================
+   LEGENDAS: blocos de 2–3 palavras, palavra ativa destacada (karaokê)
+   ===================================================================== */
+type Bloco = { texto: string; de: number; ate: number; cor?: Record<string, string> };
 
-const Legenda: React.FC<{ frases: Frase[]; topo?: number }> = ({ frases, topo = 1180 }) => {
+const LEGENDAS: Bloco[] = [
+  { texto: "Ninguém gosta", de: 0.5, ate: 2.3 },
+  { texto: "de gastar", de: 2.3, ate: 3.8, cor: { gastar: COR.vermelho } },
+  { texto: "com dedetização", de: 3.8, ate: 6, cor: { dedetização: COR.amarelo } },
+
+  { texto: "Todo mundo prefere", de: 6.3, ate: 8.2 },
+  { texto: "lazer,", de: 8.2, ate: 9.4, cor: { lazer: COR.verde } },
+  { texto: "uma viagem...", de: 9.4, ate: 12, cor: { viagem: COR.verde } },
+
+  { texto: "Até o dia", de: 12.3, ate: 14 },
+  { texto: "em que o pior", de: 14, ate: 15.8, cor: { pior: COR.vermelho } },
+  { texto: "acontece.", de: 15.8, ate: 18 },
+
+  { texto: "Quanto custa", de: 18.3, ate: 20 },
+  { texto: "a emergência", de: 20, ate: 22.2, cor: { emergência: COR.vermelho } },
+  { texto: "no hospital?", de: 22.2, ate: 24 },
+  { texto: "E o antídoto?", de: 24, ate: 26, cor: { antídoto: COR.amarelo } },
+
+  { texto: "Ver seu filho", de: 26.3, ate: 28.2, cor: { filho: COR.amarelo } },
+  { texto: "ou seu pai", de: 28.2, ate: 30, cor: { pai: COR.amarelo } },
+  { texto: "na UTI", de: 30, ate: 32, cor: { UTI: COR.vermelho } },
+  { texto: "por uma picada?", de: 32, ate: 34 },
+
+  { texto: "A Senar é", de: 34.4, ate: 36, cor: { Senar: COR.verde } },
+  { texto: "um seguro de vida", de: 36, ate: 38.2, cor: { seguro: COR.verde, vida: COR.verde } },
+  { texto: "para sua família", de: 38.2, ate: 40, cor: { família: COR.verde } },
+];
+
+const limpa = (p: string) => p.replace(/[.,?!:…]/g, "");
+
+const Legendas: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const atual = frases.find((f) => frame >= s(f.de) && frame < s(f.ate));
-  if (!atual) return null;
-  const inicio = s(atual.de);
-  const palavras = atual.texto.split(" ");
+  const bloco = LEGENDAS.find((b) => frame >= s(b.de) && frame < s(b.ate));
+  if (!bloco) return null;
+
+  const ini = s(bloco.de);
+  const fim = s(bloco.ate);
+  const palavras = bloco.texto.split(" ");
+  const local = frame - ini;
+  const entrada = spring({ frame: local, fps, config: { damping: 16, stiffness: 260, mass: 0.6 } });
+  const saida = interpolate(frame, [fim - 4, fim], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // A palavra ativa avança ao longo do bloco (deixando a última um pouco mais)
+  const passo = (fim - ini) / (palavras.length + 0.4);
+  const ativa = Math.min(palavras.length - 1, Math.floor(local / passo));
+
   return (
     <div
       style={{
         position: "absolute",
-        top: topo,
-        left: 60,
-        right: 60,
+        top: 1330,
+        left: 70,
+        right: 70,
+        height: 300,
         display: "flex",
         flexWrap: "wrap",
+        alignContent: "center",
         justifyContent: "center",
-        alignItems: "center",
-        gap: "6px 34px",
-        textAlign: "center",
+        gap: "14px 20px",
+        opacity: entrada * saida,
+        transform: `translateY(${(1 - entrada) * 26}px) scale(${interpolate(entrada, [0, 1], [0.92, 1])})`,
       }}
     >
       {palavras.map((p, i) => {
-        const f = frame - inicio - i * 4;
-        const pop = spring({ frame: f, fps, config: { damping: 12, stiffness: 220, mass: 0.6 } });
-        const cor = atual.destaque?.[p.replace(/[.,?!:]/g, "")] ?? COR.branco;
-        const destacada = cor !== COR.branco;
+        const corEnfase = bloco.cor?.[limpa(p)];
+        const ehAtiva = i === ativa;
+        const pulso = ehAtiva ? spring({ frame: local - i * passo, fps, config: { damping: 12, stiffness: 300 } }) : 1;
         return (
           <span
             key={i}
             style={{
-              display: "inline-block",
-              fontFamily: "'Inter Display', Inter, sans-serif",
+              fontFamily: FONTE,
               fontWeight: 900,
-              fontSize: destacada ? 124 : 104,
-              lineHeight: 1.05,
-              color: cor,
+              fontSize: 96,
+              lineHeight: 1,
+              letterSpacing: "-0.01em",
               textTransform: "uppercase",
-              letterSpacing: "-0.02em",
-              opacity: f < 0 ? 0 : 1,
-              transform: `scale(${interpolate(pop, [0, 1], [0.4, 1])}) rotate(${destacada ? -2 : 0}deg)`,
-              textShadow: "0 8px 0 rgba(0,0,0,.85), 0 0 40px rgba(0,0,0,.9)",
-              WebkitTextStroke: "3px rgba(0,0,0,.9)",
-              paintOrder: "stroke fill",
+              padding: "10px 20px 14px",
+              borderRadius: 18,
+              color: ehAtiva ? COR.verdeEscuro : corEnfase ?? COR.branco,
+              background: ehAtiva ? corEnfase ?? COR.verde : "transparent",
+              boxShadow: ehAtiva ? "0 12px 30px rgba(0,0,0,.45)" : "none",
+              textShadow: ehAtiva ? "none" : "0 4px 0 rgba(0,0,0,.9), 0 0 24px rgba(0,0,0,.8)",
+              transform: `scale(${interpolate(pulso, [0, 1], [1.12, 1])})`,
+              transition: "none",
             }}
           >
             {p}
@@ -95,50 +132,57 @@ const Legenda: React.FC<{ frases: Frase[]; topo?: number }> = ({ frases, topo = 
   );
 };
 
-/* ---------- Cena com foto: fundo desfocado + cartão com Ken Burns ---------- */
-const CenaFoto: React.FC<{
+/* =====================================================================
+   CENA DE FOTO: largura total, movimento de câmera e fusão suave
+   ===================================================================== */
+type Movimento = { zoom: [number, number]; x?: [number, number]; y?: [number, number] };
+
+const Foto: React.FC<{
   src: string;
-  zoomDe?: number;
-  zoomAte?: number;
-  brilhoDe?: number;
-  brilhoAte?: number;
-  aspecto?: number;
+  foco?: string; // object-position
+  mov: Movimento;
+  brilho?: [number, number];
+  tom?: string; // overlay de cor (grade)
   tremor?: boolean;
-  vinheta?: string;
-  children?: React.ReactNode;
-}> = ({ src, zoomDe = 1.05, zoomAte = 1.2, brilhoDe = 1, brilhoAte = 1, aspecto = 1.25, tremor, vinheta, children }) => {
+}> = ({ src, foco = "50% 50%", mov, brilho = [1, 1], tom, tremor }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
-  const p = interpolate(frame, [0, durationInFrames], [0, 1], { extrapolateRight: "clamp" });
-  const zoom = interpolate(p, [0, 1], [zoomDe, zoomAte]);
-  const brilho = interpolate(p, [0, 1], [brilhoDe, brilhoAte]);
-  const shake = tremor ? Math.sin(frame * 2.3) * interpolate(frame, [0, 14], [22, 0], { extrapolateRight: "clamp" }) : 0;
-  const largura = 980;
+  const p = interpolate(frame, [0, durationInFrames], [0, 1], {
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.sin),
+  });
+  const zoom = interpolate(p, [0, 1], mov.zoom);
+  const tx = interpolate(p, [0, 1], mov.x ?? [0, 0]);
+  const ty = interpolate(p, [0, 1], mov.y ?? [0, 0]);
+  const br = interpolate(p, [0, 1], brilho);
+  const shake = tremor ? Math.sin(frame * 2.1) * interpolate(frame, [0, 16], [26, 0], { extrapolateRight: "clamp" }) : 0;
+
   return (
     <AbsoluteFill style={{ backgroundColor: COR.fundo }}>
+      {/* Extensão desfocada da própria imagem: preenche o palco das legendas sem "borda" */}
       <Img
         src={staticFile(src)}
         style={{
           position: "absolute",
-          inset: -120,
-          width: "calc(100% + 240px)",
-          height: "calc(100% + 240px)",
+          inset: -80,
+          width: "calc(100% + 160px)",
+          height: "calc(100% + 160px)",
           objectFit: "cover",
-          filter: `blur(40px) brightness(${0.35 * brilho}) saturate(1.2)`,
+          objectPosition: foco,
+          filter: `blur(60px) brightness(${0.28 * br}) saturate(1.3)`,
         }}
       />
+      {/* Foto principal em largura total, com fusão em gradiente na base */}
       <div
         style={{
           position: "absolute",
-          top: 210,
-          left: (1080 - largura) / 2,
-          width: largura,
-          height: largura / aspecto,
-          borderRadius: 40,
+          top: 0,
+          left: 0,
+          width: 1080,
+          height: ALTURA_IMAGEM,
           overflow: "hidden",
-          boxShadow: "0 40px 90px rgba(0,0,0,.7)",
-          border: "4px solid rgba(255,255,255,.12)",
-          transform: `translateX(${shake}px)`,
+          WebkitMaskImage: "linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%)",
+          maskImage: "linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%)",
         }}
       >
         <Img
@@ -147,310 +191,288 @@ const CenaFoto: React.FC<{
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            transform: `scale(${zoom})`,
-            filter: `brightness(${brilho}) contrast(1.05)`,
+            objectPosition: foco,
+            transform: `translate(${tx + shake}px, ${ty}px) scale(${zoom})`,
+            filter: `brightness(${br}) contrast(1.08) saturate(1.08)`,
           }}
         />
-        {vinheta && (
-          <div style={{ position: "absolute", inset: 0, background: vinheta }} />
-        )}
+        {tom && <AbsoluteFill style={{ background: tom }} />}
+        {/* Topo levemente escurecido (área da interface do Reels) */}
+        <AbsoluteFill style={{ background: "linear-gradient(to bottom, rgba(0,0,0,.45), transparent 18%)" }} />
       </div>
-      {children}
     </AbsoluteFill>
   );
 };
 
-const Logo: React.FC<{ largura: number; style?: React.CSSProperties }> = ({ largura, style }) => (
-  <Img
-    src={staticFile("img/logo.png")}
-    style={{ width: largura, filter: "drop-shadow(0 18px 40px rgba(0,0,0,.6))", ...style }}
-  />
-);
-
-const FadeEntrada: React.FC<{ children: React.ReactNode; duracao?: number }> = ({ children, duracao = 10 }) => {
+/* Crossfade de entrada/saída para cada cena */
+const Fusao: React.FC<{ children: React.ReactNode; entrada?: boolean; saida?: boolean }> = ({
+  children,
+  entrada = true,
+  saida = true,
+}) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
-  const op = interpolate(frame, [0, duracao, durationInFrames - 6, durationInFrames], [0, 1, 1, 0.85], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
+  const op = Math.min(
+    entrada ? interpolate(frame, [0, TRANSICAO], [0, 1], { extrapolateRight: "clamp" }) : 1,
+    saida ? interpolate(frame, [durationInFrames - TRANSICAO, durationInFrames], [1, 0], { extrapolateLeft: "clamp" }) : 1
+  );
   return <AbsoluteFill style={{ opacity: op }}>{children}</AbsoluteFill>;
 };
 
-/* ---------- Cena 1: escorpião surge do escuro ---------- */
-const Cena1: React.FC = () => {
+const Logo: React.FC<{ largura: number; brilho?: boolean }> = ({ largura, brilho }) => (
+  <Img
+    src={staticFile("img/logo.png")}
+    style={{
+      width: largura,
+      filter: brilho
+        ? "drop-shadow(0 0 50px rgba(141,219,44,.5)) drop-shadow(0 24px 50px rgba(0,0,0,.7))"
+        : "drop-shadow(0 18px 40px rgba(0,0,0,.6))",
+    }}
+  />
+);
+
+/* =====================================================================
+   CENAS
+   ===================================================================== */
+const Cena1 = () => {
   const frame = useCurrentFrame();
-  const surgir = interpolate(frame, [0, 45], [0, 1], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  const surgir = interpolate(frame, [0, 50], [0, 1], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   return (
     <AbsoluteFill style={{ opacity: surgir }}>
-      <CenaFoto
-        src="img/escorpiao1.png"
-        zoomDe={1.25}
-        zoomAte={1.05}
-        brilhoDe={0.4}
-        brilhoAte={1}
-        vinheta="radial-gradient(circle at 50% 55%, transparent 35%, rgba(0,0,0,.75) 100%)"
-      >
-        <Legenda
-          frases={[
-            { texto: "Dedetização:", destaque: { "Dedetização": COR.amarelo }, de: 0.4, ate: 2.4 },
-            { texto: "Ninguém gosta de gastar.", destaque: { gastar: COR.vermelho }, de: 2.4, ate: 6 },
-          ]}
-        />
-      </CenaFoto>
+      <Foto
+        src="img/hd/escorpiao1.jpg"
+        foco="40% 55%"
+        mov={{ zoom: [1.3, 1.08], x: [40, 0] }}
+        brilho={[0.35, 1]}
+        tom="radial-gradient(circle at 45% 60%, transparent 30%, rgba(0,0,0,.7) 95%)"
+      />
     </AbsoluteFill>
   );
 };
 
-/* ---------- Cena 2: paz e cuidado ---------- */
-const Cena2: React.FC = () => (
-  <FadeEntrada>
-    <CenaFoto src="img/bebe.png" zoomDe={1.02} zoomAte={1.18} brilhoDe={1.05} brilhoAte={1.1} aspecto={1.3}>
-      <Legenda
-        frases={[
-          { texto: "Todo mundo prefere...", de: 0.2, ate: 2.6 },
-          { texto: "Lazer ou viagem.", destaque: { Lazer: COR.verde, viagem: COR.verde }, de: 2.6, ate: 6 },
-        ]}
-      />
-    </CenaFoto>
-  </FadeEntrada>
+const Cena2 = () => (
+  <Foto src="img/hd/bebe.jpg" foco="78% 55%" mov={{ zoom: [1.0, 1.1], y: [0, -10] }} brilho={[1.05, 1.12]} tom="linear-gradient(rgba(255,190,120,.10), rgba(255,190,120,.06))" />
 );
 
-/* ---------- Cena 3: corte brusco, ameaça escondida ---------- */
-const Cena3: React.FC = () => {
+const Cena3 = () => {
   const frame = useCurrentFrame();
-  const flash = interpolate(frame, [0, 3, 12], [1, 0.9, 0], { extrapolateRight: "clamp" });
+  const flash = interpolate(frame, [0, 2, 12], [1, 0.95, 0], { extrapolateRight: "clamp" });
   return (
     <AbsoluteFill>
-      <CenaFoto
-        src="img/escorpiao2.png"
-        zoomDe={1.35}
-        zoomAte={1.1}
-        brilhoDe={0.9}
-        brilhoAte={0.75}
+      <Foto
+        src="img/hd/escorpiao2.jpg"
+        foco="38% 55%"
+        mov={{ zoom: [1.18, 1.03] }}
+        brilho={[1, 0.8]}
         tremor
-        vinheta="radial-gradient(circle at 50% 50%, transparent 30%, rgba(120,0,0,.55) 100%)"
-      >
-        <Legenda
-          frases={[
-            { texto: "Até o dia em que...", de: 0.2, ate: 2.4 },
-            { texto: "O pior acontece.", destaque: { pior: COR.vermelho }, de: 2.4, ate: 6 },
-          ]}
-        />
-      </CenaFoto>
+        tom="radial-gradient(circle at 45% 55%, transparent 25%, rgba(110,0,0,.6) 100%)"
+      />
       <AbsoluteFill style={{ backgroundColor: "#fff", opacity: flash }} />
     </AbsoluteFill>
   );
 };
 
-/* ---------- Cena 4: monitor cardíaco (sem imagem chocante) ---------- */
-const ecgPath = (largura: number, meio: number) => {
-  // Um batimento a cada 180px
+const ecg = (largura: number, meio: number, passo = 270) => {
   let d = `M 0 ${meio}`;
-  for (let x = 0; x < largura; x += 180) {
-    d += ` L ${x + 60} ${meio} L ${x + 72} ${meio - 18} L ${x + 84} ${meio} L ${x + 96} ${meio}`;
-    d += ` L ${x + 104} ${meio + 30} L ${x + 116} ${meio - 150} L ${x + 128} ${meio + 60} L ${x + 138} ${meio}`;
-    d += ` L ${x + 152} ${meio - 24} L ${x + 166} ${meio} L ${x + 180} ${meio}`;
+  for (let x = 0; x < largura + passo; x += passo) {
+    d += ` L ${x + 90} ${meio} L ${x + 108} ${meio - 26} L ${x + 126} ${meio} L ${x + 144} ${meio}`;
+    d += ` L ${x + 156} ${meio + 40} L ${x + 174} ${meio - 230} L ${x + 192} ${meio + 90} L ${x + 207} ${meio}`;
+    d += ` L ${x + 228} ${meio - 34} L ${x + 249} ${meio} L ${x + passo} ${meio}`;
   }
   return d;
 };
 
-const Cena4: React.FC = () => {
+const Cena4 = () => {
   const frame = useCurrentFrame();
-  const larguraLinha = 980;
-  const progresso = (frame % 60) / 60; // varredura a cada 2s
-  const pisca = Math.floor(frame / 15) % 2 === 0 ? 1 : 0.35;
+  const varredura = (frame % 75) / 75;
+  const pisca = Math.floor(frame / 15) % 2 === 0;
   return (
-    <FadeEntrada duracao={6}>
-      <AbsoluteFill style={{ backgroundColor: "#020806" }}>
-        <div
-          style={{
-            position: "absolute",
-            top: 210,
-            left: 50,
-            width: larguraLinha,
-            height: 784,
-            borderRadius: 40,
-            background:
-              "linear-gradient(rgba(141,219,44,.06) 1px, transparent 1px) 0 0/ 49px 49px, linear-gradient(90deg, rgba(141,219,44,.06) 1px, transparent 1px) 0 0/ 49px 49px, #03140C",
-            border: "4px solid rgba(141,219,44,.25)",
-            overflow: "hidden",
-            boxShadow: "0 0 120px rgba(141,219,44,.12) inset",
-            filter: "blur(.4px)",
-          }}
-        >
-          <div style={{ position: "absolute", top: 36, left: 44, display: "flex", gap: 18, alignItems: "center" }}>
-            <div style={{ width: 26, height: 26, borderRadius: 13, background: COR.vermelho, opacity: pisca, boxShadow: `0 0 30px ${COR.vermelho}` }} />
-            <span style={{ fontFamily: "Inter", fontWeight: 800, fontSize: 40, color: COR.vermelho, letterSpacing: 4, opacity: pisca }}>
-              EMERGÊNCIA
-            </span>
-          </div>
-          <div style={{ position: "absolute", top: 30, right: 44, fontFamily: "JetBrains Mono, monospace", color: COR.verde, textAlign: "right" }}>
-            <div style={{ fontSize: 30, opacity: 0.7 }}>BPM</div>
-            <div style={{ fontSize: 110, fontWeight: 800, lineHeight: 1 }}>{142 + Math.round(Math.sin(frame / 9) * 6)}</div>
-          </div>
-          <svg width={larguraLinha} height={784} style={{ position: "absolute", inset: 0 }}>
-            <defs>
-              <linearGradient id="g" x1="0" x2="1">
-                <stop offset={Math.max(0, progresso - 0.35)} stopColor={COR.verde} stopOpacity={0} />
-                <stop offset={progresso} stopColor={COR.verde} stopOpacity={1} />
-                <stop offset={Math.min(1, progresso + 0.001)} stopColor={COR.verde} stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <path d={ecgPath(larguraLinha, 470)} stroke="url(#g)" strokeWidth={7} fill="none" strokeLinejoin="round" style={{ filter: `drop-shadow(0 0 12px ${COR.verde})` }} />
-          </svg>
-        </div>
-        <Legenda
-          frases={[
-            { texto: "Quanto custa a emergência?", destaque: { emergência: COR.vermelho }, de: 0.2, ate: 4.4 },
-            { texto: "E o antídoto?", destaque: { antídoto: COR.amarelo }, de: 4.4, ate: 8 },
-          ]}
-        />
-      </AbsoluteFill>
-    </FadeEntrada>
-  );
-};
-
-/* ---------- Cena 5: família segura + escudo Senar ---------- */
-const Cena5: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const escudo = spring({ frame: frame - 30, fps, config: { damping: 14 } });
-  return (
-    <FadeEntrada duracao={18}>
-      <CenaFoto src="img/familia.png" zoomDe={1.15} zoomAte={1.02} brilhoDe={0.85} brilhoAte={1.1} aspecto={1.25}>
-        <div style={{ position: "absolute", top: 720, right: 70, transform: `scale(${escudo})`, opacity: escudo }}>
-          <Logo largura={250} />
-        </div>
-        <Legenda
-          topo={1200}
-          frases={[
-            { texto: "Ver seu filho pequeno", destaque: { filho: COR.amarelo }, de: 0.2, ate: 2.8 },
-            { texto: "ou pai idoso...", destaque: { pai: COR.amarelo }, de: 2.8, ate: 5.2 },
-            { texto: "na UTI.", destaque: { UTI: COR.vermelho }, de: 5.2, ate: 8 },
-          ]}
-        />
-      </CenaFoto>
-    </FadeEntrada>
-  );
-};
-
-/* ---------- Cena 6: casa protegida + logo grande ---------- */
-const Cena6: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const pop = spring({ frame: frame - 8, fps, config: { damping: 10, stiffness: 140 } });
-  const brilho = interpolate(frame, [0, 40], [0.5, 1.15], { extrapolateRight: "clamp" });
-  return (
-    <AbsoluteFill style={{ backgroundColor: COR.fundo }}>
-      <Img
-        src={staticFile("img/familia.png")}
-        style={{ position: "absolute", width: "100%", height: "100%", objectFit: "cover", filter: `brightness(${brilho * 0.5}) blur(16px)`, transform: `scale(${1.1 + frame / 2000})` }}
+    <AbsoluteFill style={{ background: "radial-gradient(circle at 50% 40%, #0A2A22 0%, #020807 75%)" }}>
+      <AbsoluteFill
+        style={{
+          background:
+            "linear-gradient(rgba(141,219,44,.07) 1px, transparent 1px) 0 0/60px 60px, linear-gradient(90deg, rgba(141,219,44,.07) 1px, transparent 1px) 0 0/60px 60px",
+          WebkitMaskImage: "linear-gradient(to bottom, #000 0%, #000 60%, transparent 75%)",
+        }}
       />
-      <AbsoluteFill style={{ background: "radial-gradient(circle at 50% 35%, rgba(141,219,44,.25), transparent 60%)" }} />
-      <div style={{ position: "absolute", top: 230, width: "100%", display: "flex", justifyContent: "center" }}>
-        <div style={{ transform: `scale(${interpolate(pop, [0, 1], [0.3, 1])})`, opacity: pop }}>
-          <Logo largura={640} style={{ filter: "drop-shadow(0 0 60px rgba(141,219,44,.55)) drop-shadow(0 30px 60px rgba(0,0,0,.7))" }} />
+      <div style={{ position: "absolute", top: 260, left: 70, right: 70, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 18, opacity: pisca ? 1 : 0.35 }}>
+          <div style={{ width: 30, height: 30, borderRadius: 15, background: COR.vermelho, boxShadow: `0 0 34px ${COR.vermelho}` }} />
+          <span style={{ fontFamily: FONTE, fontWeight: 800, fontSize: 46, color: COR.vermelho, letterSpacing: 6 }}>EMERGÊNCIA</span>
+        </div>
+        <div style={{ fontFamily: "JetBrains Mono, monospace", color: COR.verde, textAlign: "right" }}>
+          <div style={{ fontSize: 34, opacity: 0.7, letterSpacing: 4 }}>BPM</div>
+          <div style={{ fontSize: 150, fontWeight: 800, lineHeight: 1, textShadow: `0 0 30px ${COR.verde}` }}>
+            {148 + Math.round(Math.sin(frame / 8) * 7)}
+          </div>
         </div>
       </div>
-      <Legenda
-        topo={1220}
-        frases={[
-          { texto: "É um seguro de vida", destaque: { seguro: COR.verde, vida: COR.verde }, de: 0.5, ate: 3.2 },
-          { texto: "para sua família.", destaque: { família: COR.verde }, de: 3.2, ate: 6 },
-        ]}
-      />
+      <svg width={1080} height={1320} style={{ position: "absolute", top: 0, left: 0 }}>
+        <defs>
+          <linearGradient id="rastro" x1="0" x2="1">
+            <stop offset={Math.max(0, varredura - 0.45)} stopColor={COR.verde} stopOpacity={0} />
+            <stop offset={varredura} stopColor={COR.verde} stopOpacity={1} />
+            <stop offset={Math.min(1, varredura + 0.002)} stopColor={COR.verde} stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <path d={ecg(1080, 820)} stroke="url(#rastro)" strokeWidth={9} fill="none" strokeLinejoin="round" style={{ filter: `drop-shadow(0 0 16px ${COR.verde})` }} />
+        <circle cx={varredura * 1080} cy={820} r={0} />
+      </svg>
     </AbsoluteFill>
   );
 };
 
-/* ---------- Cena 7: chamada para ação ---------- */
+const Cena5 = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const escudo = spring({ frame: frame - 150, fps, config: { damping: 14 } });
+  return (
+    <AbsoluteFill>
+      <Foto src="img/hd/familia.jpg" foco="42% 8%" mov={{ zoom: [1.06, 1.0], x: [-20, 10] }} brilho={[0.9, 1.1]} />
+      <div style={{ position: "absolute", top: 960, right: 60, opacity: escudo, transform: `scale(${escudo})` }}>
+        <Logo largura={240} />
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+const Cena6 = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const pop = spring({ frame: frame - 6, fps, config: { damping: 11, stiffness: 140 } });
+  const luz = interpolate(frame, [0, 45], [0.45, 1], { extrapolateRight: "clamp" });
+  return (
+    <AbsoluteFill>
+      <Foto src="img/hd/aplicacao.jpg" foco="30% 60%" mov={{ zoom: [1.1, 1.22] }} brilho={[luz * 0.55, 0.6]} />
+      <AbsoluteFill style={{ background: "radial-gradient(circle at 50% 38%, rgba(141,219,44,.28), transparent 55%)" }} />
+      <div style={{ position: "absolute", top: 300, width: "100%", display: "flex", justifyContent: "center" }}>
+        <div style={{ opacity: pop, transform: `scale(${interpolate(pop, [0, 1], [0.4, 1])})` }}>
+          <Logo largura={620} brilho />
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+const Whats = ({ tam }: { tam: number }) => (
+  <svg width={tam} height={tam} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.2-.2-.4-.3z" />
+  </svg>
+);
+
 const Cena7: React.FC<{ variante: Props["variante"] }> = ({ variante }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const entrada = spring({ frame, fps, config: { damping: 14 } });
-  const pulso = 1 + Math.sin(frame / 5) * 0.035;
-  const seta = Math.sin(frame / 4) * 18;
-  const titulo = variante === "reels" ? ["CLICA NO", "LINK DA BIO"] : ["TOQUE EM", "ENVIAR MENSAGEM"];
+  const e = (atraso: number) => spring({ frame: frame - atraso, fps, config: { damping: 14, stiffness: 160 } });
+  const pulso = 1 + Math.sin(frame / 5) * 0.03;
+  const linhas = variante === "reels" ? ["Clica no", "link da bio"] : ["Toque em", "Enviar mensagem"];
   return (
-    <AbsoluteFill style={{ background: "radial-gradient(circle at 50% 30%, #0F2A1C, #030806 70%)", alignItems: "center" }}>
-      <div style={{ marginTop: 200, opacity: entrada, transform: `translateY(${(1 - entrada) * 60}px)` }}>
-        <Logo largura={380} />
+    <AbsoluteFill style={{ background: "radial-gradient(circle at 50% 28%, #12301F 0%, #040A07 65%)", alignItems: "center" }}>
+      <div style={{ marginTop: 230, opacity: e(0), transform: `translateY(${(1 - e(0)) * 50}px)` }}>
+        <Logo largura={400} brilho />
       </div>
-      <div style={{ marginTop: 60, textAlign: "center", transform: `scale(${pulso})` }}>
-        {titulo.map((l, i) => (
-          <div
-            key={l}
-            style={{
-              fontFamily: "'Inter Display', Inter",
-              fontWeight: 900,
-              fontSize: variante === "ads" && i === 1 ? 104 : 128,
-              lineHeight: 1.02,
-              color: i === 1 ? COR.verde : COR.branco,
-              letterSpacing: "-0.02em",
-              textShadow: "0 8px 0 rgba(0,0,0,.8)",
-            }}
-          >
-            {l}
-          </div>
-        ))}
+      <div style={{ marginTop: 70, textAlign: "center", opacity: e(8), transform: `translateY(${(1 - e(8)) * 40}px)` }}>
+        <div style={{ fontFamily: FONTE, fontWeight: 900, fontSize: 112, lineHeight: 1, color: COR.branco, textTransform: "uppercase" }}>{linhas[0]}</div>
+        <div
+          style={{
+            display: "inline-block",
+            marginTop: 18,
+            fontFamily: FONTE,
+            fontWeight: 900,
+            fontSize: variante === "ads" ? 92 : 112,
+            lineHeight: 1,
+            color: COR.verdeEscuro,
+            background: COR.verde,
+            padding: "12px 28px 18px",
+            borderRadius: 22,
+            textTransform: "uppercase",
+          }}
+        >
+          {linhas[1]}
+        </div>
       </div>
       <div
         style={{
-          marginTop: 56,
+          marginTop: 70,
           display: "flex",
           alignItems: "center",
           gap: 22,
           background: "#25D366",
           color: "#fff",
           borderRadius: 999,
-          padding: "26px 52px",
-          fontFamily: "Inter",
+          padding: "28px 56px",
+          fontFamily: FONTE,
           fontWeight: 800,
-          fontSize: variante === "reels" ? 64 : 50,
-          boxShadow: "0 20px 60px rgba(37,211,102,.45)",
-          transform: `scale(${spring({ frame: frame - 12, fps, config: { damping: 12 } })})`,
+          fontSize: variante === "reels" ? 62 : 54,
+          boxShadow: "0 22px 60px rgba(37,211,102,.4)",
+          opacity: e(16),
+          transform: `scale(${e(16) * pulso})`,
         }}
       >
-        <svg width="66" height="66" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.2-.2-.4-.3z" />
-        </svg>
+        <Whats tam={64} />
         <span>{variante === "reels" ? "(81) 99301-8101" : "Fale com a Senar"}</span>
       </div>
-      <div style={{ marginTop: 50, fontFamily: "Inter", fontWeight: 800, fontSize: 52, color: COR.amarelo, letterSpacing: 1 }}>
+      <div style={{ marginTop: 56, fontFamily: FONTE, fontWeight: 800, fontSize: 50, color: COR.amarelo, letterSpacing: 2, opacity: e(26) }}>
         NÃO ESPERE O SUSTO.
       </div>
-      {variante === "ads" && (
-        <div style={{ marginTop: 20, fontSize: 110, transform: `translateY(${seta}px)` }}>👇</div>
-      )}
     </AbsoluteFill>
   );
 };
 
-/* ---------- Composição principal ---------- */
+/* Grão de filme + vinheta: dá acabamento e disfarça a suavidade das fotos */
+const Acabamento = () => {
+  const frame = useCurrentFrame();
+  const ox = (frame * 37) % 200;
+  const oy = (frame * 53) % 200;
+  const ruido =
+    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")";
+  return (
+    <>
+      <AbsoluteFill style={{ backgroundImage: ruido, backgroundPosition: `${ox}px ${oy}px`, opacity: 0.07, mixBlendMode: "overlay" }} />
+      <AbsoluteFill style={{ background: "radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.45) 100%)" }} />
+    </>
+  );
+};
+
+/* =====================================================================
+   COMPOSIÇÃO
+   ===================================================================== */
 export const TragediaSilenciosa: React.FC<Props> = ({ variante, comNarracao }) => {
-  const seq = (c: readonly [number, number]) => ({ from: s(c[0]), durationInFrames: s(c[1] - c[0]) });
+  // Cada cena começa TRANSICAO frames antes para fundir com a anterior
+  const cena = (de: number, ate: number, filho: React.ReactNode, opts: { entrada?: boolean; saida?: boolean } = {}) => {
+    const from = Math.max(0, s(de) - (opts.entrada === false ? 0 : TRANSICAO));
+    return (
+      <Sequence from={from} durationInFrames={s(ate) - from}>
+        <Fusao entrada={opts.entrada !== false && de > 0} saida={opts.saida !== false}>
+          {filho}
+        </Fusao>
+      </Sequence>
+    );
+  };
+
   return (
     <AbsoluteFill style={{ backgroundColor: COR.fundo }}>
-      <Sequence {...seq(CENAS.c1)}><Cena1 /></Sequence>
-      <Sequence {...seq(CENAS.c2)}><Cena2 /></Sequence>
-      <Sequence {...seq(CENAS.c3)}><Cena3 /></Sequence>
-      <Sequence {...seq(CENAS.c4)}><Cena4 /></Sequence>
-      <Sequence {...seq(CENAS.c5)}><Cena5 /></Sequence>
-      <Sequence {...seq(CENAS.c6)}><Cena6 /></Sequence>
-      <Sequence {...seq(CENAS.c7)}><Cena7 variante={variante} /></Sequence>
+      {cena(0, 6, <Cena1 />)}
+      {cena(6, 12, <Cena2 />, { saida: false })}
+      {cena(12, 18, <Cena3 />, { entrada: false })}
+      {cena(18, 26, <Cena4 />)}
+      {cena(26, 34, <Cena5 />)}
+      {cena(34, 40, <Cena6 />)}
+      {cena(40, 46, <Cena7 variante={variante} />, { saida: false })}
 
-      {/* Trilha e efeitos */}
+      <Legendas />
+      <Acabamento />
+
+      {/* Trilha e efeitos sonoros */}
       <Audio src={staticFile("sfx/drone.wav")} volume={comNarracao ? 0.18 : 0.35} />
-      <Sequence from={s(6) - 8}><Audio src={staticFile("sfx/whoosh.wav")} volume={0.5} /></Sequence>
+      <Sequence from={s(6) - 10}><Audio src={staticFile("sfx/whoosh.wav")} volume={0.45} /></Sequence>
       <Sequence from={s(12)}><Audio src={staticFile("sfx/impacto.wav")} volume={0.9} /></Sequence>
       <Sequence from={s(18)} durationInFrames={s(8)}><Audio src={staticFile("sfx/bipe.wav")} volume={0.35} /></Sequence>
-      <Sequence from={s(26) - 8}><Audio src={staticFile("sfx/whoosh.wav")} volume={0.4} /></Sequence>
-      <Sequence from={s(34) + 8}><Audio src={staticFile("sfx/logo.wav")} volume={0.7} /></Sequence>
-      <Sequence from={s(40) + 12}><Audio src={staticFile("sfx/notificacao.wav")} volume={0.7} /></Sequence>
-      <Sequence from={s(43)}><Audio src={staticFile("sfx/notificacao.wav")} volume={0.5} /></Sequence>
+      <Sequence from={s(26) - 10}><Audio src={staticFile("sfx/whoosh.wav")} volume={0.4} /></Sequence>
+      <Sequence from={s(34) + 6}><Audio src={staticFile("sfx/logo.wav")} volume={0.7} /></Sequence>
+      <Sequence from={s(40) + 16}><Audio src={staticFile("sfx/notificacao.wav")} volume={0.7} /></Sequence>
 
-      {/* Narração opcional: grave e salve em public/narracao.mp3 e renderize com --props='{"comNarracao":true}' */}
+      {/* Narração opcional: salve em public/narracao.mp3 e renderize com comNarracao=true */}
       {comNarracao && <Audio src={staticFile("narracao.mp3")} volume={1} />}
     </AbsoluteFill>
   );
