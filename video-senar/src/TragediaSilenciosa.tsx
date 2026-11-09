@@ -234,17 +234,70 @@ const Logo: React.FC<{ largura: number; brilho?: boolean }> = ({ largura, brilho
 /* =====================================================================
    CENAS
    ===================================================================== */
+/* Panorâmica: imagem larga (escorpião + pé) com movimento horizontal de câmera */
+const PROPORCAO_PANO = 2580 / 818;
+const Panorama: React.FC<{
+  altura: [number, number]; // altura da imagem na tela (início → fim)
+  centroX: [number, number]; // ponto da imagem (0–1) no centro da tela (início → fim)
+  brilho?: [number, number];
+  tom?: string;
+  tremor?: boolean;
+}> = ({ altura, centroX, brilho = [1, 1], tom, tremor }) => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+  const p = interpolate(frame, [0, durationInFrames], [0, 1], { extrapolateRight: "clamp", easing: Easing.inOut(Easing.cubic) });
+  const h = interpolate(p, [0, 1], altura);
+  const w = h * PROPORCAO_PANO;
+  const cx = interpolate(p, [0, 1], centroX);
+  const left = Math.min(0, Math.max(1080 - w, 540 - cx * w));
+  const br = interpolate(p, [0, 1], brilho);
+  const shake = tremor ? Math.sin(frame * 2.1) * interpolate(frame, [0, 16], [24, 0], { extrapolateRight: "clamp" }) : 0;
+  const src = staticFile("img/hd/escorpiao-pe.jpg");
+  const centroY = 660;
+  return (
+    <AbsoluteFill style={{ backgroundColor: COR.fundo }}>
+      <Img
+        src={src}
+        style={{
+          position: "absolute",
+          inset: -100,
+          width: "calc(100% + 200px)",
+          height: "calc(100% + 200px)",
+          objectFit: "cover",
+          objectPosition: `${cx * 100}% 50%`,
+          filter: `blur(70px) brightness(${0.3 * br}) saturate(1.3)`,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          left: left + shake,
+          top: centroY - h / 2,
+          width: w,
+          height: h,
+          WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, #000 4%, #000 88%, transparent 100%)",
+          maskImage: "linear-gradient(to bottom, transparent 0%, #000 4%, #000 88%, transparent 100%)",
+        }}
+      >
+        <Img src={src} style={{ width: "100%", height: "100%", filter: `brightness(${br}) contrast(1.06) saturate(1.05)` }} />
+        {tom && <AbsoluteFill style={{ background: tom }} />}
+      </div>
+      <AbsoluteFill style={{ background: "linear-gradient(to bottom, rgba(0,0,0,.45), transparent 16%)" }} />
+    </AbsoluteFill>
+  );
+};
+
 const Cena1 = () => {
   const frame = useCurrentFrame();
-  const surgir = interpolate(frame, [0, 50], [0, 1], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  const surgir = interpolate(frame, [0, 45], [0, 1], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   return (
     <AbsoluteFill style={{ opacity: surgir }}>
-      <Foto
-        src="img/hd/escorpiao1.jpg"
-        foco="40% 55%"
-        mov={{ zoom: [1.3, 1.08], x: [40, 0] }}
+      {/* Só o escorpião: o pé fica fora do quadro até a cena 3 */}
+      <Panorama
+        altura={[540, 610]}
+        centroX={[0.33, 0.335]}
         brilho={[0.35, 1]}
-        tom="radial-gradient(circle at 45% 60%, transparent 30%, rgba(0,0,0,.7) 95%)"
+        tom="radial-gradient(ellipse at 40% 50%, transparent 35%, rgba(0,0,0,.65) 100%)"
       />
     </AbsoluteFill>
   );
@@ -259,13 +312,13 @@ const Cena3 = () => {
   const flash = interpolate(frame, [0, 2, 12], [1, 0.95, 0], { extrapolateRight: "clamp" });
   return (
     <AbsoluteFill>
-      <Foto
-        src="img/hd/escorpiao2.jpg"
-        foco="38% 55%"
-        mov={{ zoom: [1.18, 1.03] }}
-        brilho={[1, 0.8]}
+      {/* Revelação: a câmera desliza do escorpião até o pé da criança */}
+      <Panorama
+        altura={[700, 600]}
+        centroX={[0.33, 0.78]}
+        brilho={[1, 0.92]}
         tremor
-        tom="radial-gradient(circle at 45% 55%, transparent 25%, rgba(110,0,0,.6) 100%)"
+        tom="radial-gradient(ellipse at 60% 50%, transparent 40%, rgba(110,0,0,.5) 100%)"
       />
       <AbsoluteFill style={{ backgroundColor: "#fff", opacity: flash }} />
     </AbsoluteFill>
