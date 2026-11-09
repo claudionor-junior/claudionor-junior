@@ -221,7 +221,7 @@ const Fusao: React.FC<{ children: React.ReactNode; entrada?: boolean; saida?: bo
 
 const Logo: React.FC<{ largura: number; brilho?: boolean }> = ({ largura, brilho }) => (
   <Img
-    src={staticFile("img/logo.png")}
+    src={staticFile("img/logo-senar-confort.png")}
     style={{
       width: largura,
       filter: brilho
