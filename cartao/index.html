@@ -1,0 +1,422 @@
+<title>Junior Mello BYD</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Claudionor Junior, Gerente de Negócios BYD Parvi. Catálogo BYD, ficha técnica, WhatsApp e redes sociais.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: cartão de visita em coluna única (mobile first), depois catálogo em grade e ficha técnica em painel */
+:root{
+  --bg:#f3f6fa;
+  --surface:#ffffff;
+  --ink:#0d1b2a;
+  --muted:#5a6b7d;
+  --line:#dbe3ec;
+  --accent:#1f7ae0;        /* azul elétrico, puxado da camisa */
+  --accent-soft:#e3effc;
+  --volt:#14b88a;          /* verde de "energia" para elétricos */
+  --volt-soft:#dcf5ec;
+  --hybrid:#c27a12;
+  --hybrid-soft:#fbefd9;
+  --wa:#1faa59;
+  --hero-a:#0d1b2a;
+  --hero-b:#163556;
+  --on-hero:#f4f8fc;
+  --on-hero-muted:#a9bdd3;
+  --shadow:0 10px 30px -18px rgba(13,27,42,.35);
+  --f-display:"Sora", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Manrope", "Segoe UI", system-ui, sans-serif;
+  --f-data:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#08111c; --surface:#0f1c2b; --ink:#e8eff7; --muted:#93a6ba; --line:#1f3247;
+    --accent:#4da0ff; --accent-soft:#12304f; --volt:#33d6a5; --volt-soft:#0e3a2f;
+    --hybrid:#f0a83a; --hybrid-soft:#3a2a10; --wa:#27c46a;
+    --hero-a:#050c15; --hero-b:#10294a; --on-hero:#f4f8fc; --on-hero-muted:#9fb4cb;
+    --shadow:0 10px 30px -18px rgba(0,0,0,.8);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#08111c; --surface:#0f1c2b; --ink:#e8eff7; --muted:#93a6ba; --line:#1f3247;
+  --accent:#4da0ff; --accent-soft:#12304f; --volt:#33d6a5; --volt-soft:#0e3a2f;
+  --hybrid:#f0a83a; --hybrid-soft:#3a2a10; --wa:#27c46a;
+  --hero-a:#050c15; --hero-b:#10294a; --on-hero:#f4f8fc; --on-hero-muted:#9fb4cb;
+  --shadow:0 10px 30px -18px rgba(0,0,0,.8);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+
+/* ---------- Hero / cartão ---------- */
+.hero{background:radial-gradient(120% 90% at 85% 0%, var(--hero-b) 0%, var(--hero-a) 62%);color:var(--on-hero);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;inset:auto -10% -1px -10%;height:120px;background:repeating-linear-gradient(90deg, transparent 0 22px, rgba(77,160,255,.08) 22px 23px);mask:linear-gradient(transparent, #000);pointer-events:none}
+.hero .wrap{padding-block:40px 34px;position:relative;z-index:1}
+.card-top{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.avatar{width:104px;height:104px;border-radius:50%;object-fit:cover;flex:none;border:3px solid rgba(255,255,255,.9);box-shadow:0 0 0 6px rgba(77,160,255,.25)}
+.who{min-width:0;flex:1 1 220px}
+.eyebrow{font-family:var(--f-data);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--on-hero-muted);margin:0 0 6px}
+.who h1{font-family:var(--f-display);font-weight:700;font-size:clamp(26px,6vw,36px);line-height:1.1;margin:0;text-wrap:balance}
+.role{margin:6px 0 0;font-size:15px;color:var(--on-hero)}
+.role b{font-weight:700}
+.place{margin:4px 0 0;font-size:13px;color:var(--on-hero-muted)}
+
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:26px}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:12px 16px;border-radius:14px;font-weight:700;font-size:15px;text-decoration:none;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:var(--on-hero);cursor:pointer;font-family:inherit;transition:transform .15s ease, background .15s ease}
+.btn:hover{background:rgba(255,255,255,.12)}
+.btn:active{transform:scale(.98)}
+.btn svg{width:20px;height:20px;flex:none}
+.btn.wa{grid-column:1 / -1;background:var(--wa);border-color:transparent;color:#fff;font-size:16px;min-height:58px}
+.btn.wa:hover{filter:brightness(1.06)}
+.btn[aria-disabled="true"]{opacity:.55;cursor:default}
+.btn small{font-weight:500;opacity:.8;font-size:12px}
+.phone-line{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;font-family:var(--f-data);font-size:13px;color:var(--on-hero-muted);flex-wrap:wrap}
+.phone-line span{user-select:all}
+.copy{background:none;border:1px solid rgba(255,255,255,.2);color:var(--on-hero);border-radius:999px;padding:4px 12px;font:600 12px var(--f-body);cursor:pointer}
+
+/* ---------- Catálogo ---------- */
+.section{padding-block:34px 10px}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.sec-head h2{font-family:var(--f-display);font-size:24px;margin:0;font-weight:700}
+.sec-head p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.search{flex:1 1 220px;max-width:320px;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 12px}
+.search svg{width:18px;height:18px;color:var(--muted);flex:none}
+.search input{border:0;background:transparent;color:var(--ink);font:500 15px var(--f-body);padding:11px 0;width:100%;min-width:0;outline:none}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;font:600 13px var(--f-body);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.car{display:flex;flex-direction:column;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:0;overflow:hidden;cursor:pointer;color:inherit;font:inherit;box-shadow:var(--shadow);transition:transform .18s ease, border-color .18s ease}
+.car:hover{transform:translateY(-2px);border-color:var(--accent)}
+.car .art{height:118px;display:flex;align-items:flex-end;justify-content:center;background:linear-gradient(180deg,var(--accent-soft),transparent);padding:10px 14px 0;position:relative}
+.car .art svg{width:82%;max-width:220px;height:auto;color:var(--ink)}
+.badge{position:absolute;top:10px;left:10px;font:600 11px var(--f-data);letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:999px}
+.badge.ev{background:var(--volt-soft);color:var(--volt)}
+.badge.phev{background:var(--hybrid-soft);color:var(--hybrid)}
+.car .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.car h3{font-family:var(--f-display);font-size:19px;margin:0;font-weight:600}
+.car .cat{color:var(--muted);font-size:13px;margin:-6px 0 0}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:auto}
+.kpi{background:var(--bg);border-radius:10px;padding:8px 8px 7px}
+.kpi b{display:block;font:500 14px var(--f-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi span{font-size:11px;color:var(--muted)}
+.more{font-size:13px;font-weight:700;color:var(--accent)}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:30px 0}
+.note{color:var(--muted);font-size:12px;margin:14px 0 0}
+
+/* ---------- Ficha técnica (dialog) ---------- */
+dialog{border:0;padding:0;background:var(--surface);color:var(--ink);width:min(560px,100%);max-height:min(92dvh,900px);border-radius:22px;box-shadow:0 30px 80px -20px rgba(0,0,0,.6)}
+dialog::backdrop{background:rgba(5,12,21,.6);backdrop-filter:blur(3px)}
+@media (max-width:600px){
+  dialog{margin:auto 0 0;max-width:100%;width:100%;border-radius:22px 22px 0 0;max-height:92dvh}
+}
+.sheet{display:flex;flex-direction:column;max-height:inherit}
+.sheet-head{position:relative;background:linear-gradient(180deg,var(--accent-soft),var(--surface));padding:22px 20px 6px}
+.sheet-head svg.car-art{display:block;width:72%;max-width:300px;margin:6px auto 0;color:var(--ink)}
+.close{position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:20px;line-height:1;cursor:pointer}
+.sheet-head h3{font-family:var(--f-display);font-size:26px;margin:4px 0 0}
+.sheet-head p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.sheet-body{overflow-y:auto;padding:8px 20px 20px}
+.pitch{font-size:15px;margin:10px 0 14px}
+.specs{width:100%;border-collapse:collapse;font-size:14px}
+.specs th{text-align:left;font-weight:500;color:var(--muted);padding:10px 12px 10px 0;width:48%;vertical-align:top}
+.specs td{font:500 14px var(--f-data);font-variant-numeric:tabular-nums;padding:10px 0;text-align:right}
+.specs tr+tr{border-top:1px solid var(--line)}
+.sheet-foot{display:grid;gap:10px;padding:14px 20px calc(16px + env(safe-area-inset-bottom, 0px));border-top:1px solid var(--line);background:var(--surface)}
+.sheet-foot .btn{color:#fff}
+.sheet-foot .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.sheet-foot .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* ---------- Rodapé ---------- */
+.visit{margin-top:34px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.visit h2{font-family:var(--f-display);font-size:18px;margin:0}
+.visit p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.visit a{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);text-decoration:none;font-weight:700;border-radius:12px;padding:12px 16px}
+footer{color:var(--muted);font-size:12px;text-align:center;padding-block:28px 34px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:20}
+
+@media (min-width:720px){
+  .hero .wrap{padding-block:56px 44px}
+  .avatar{width:132px;height:132px}
+  .actions{grid-template-columns:2fr 1fr 1fr 1fr}
+  .btn.wa{grid-column:auto}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="card-top">
+      <img class="avatar" src="junior.jpg" alt="Foto de Claudionor Junior" width="132" height="132">
+      <div class="who">
+        <p class="eyebrow">Cartão digital</p>
+        <h1>Claudionor Junior</h1>
+        <p class="role">Gerente de Negócios · <b>BYD Parvi</b></p>
+        <p class="place">Piedade · Jaboatão dos Guararapes, PE</p>
+      </div>
+    </div>
+
+    <nav class="actions" aria-label="Contato">
+      <a class="btn wa" id="wa-main" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.9 9.9 0 0 0-8.5 15l-1.4 5.1 5.24-1.37A9.93 9.93 0 1 0 12.04 2Zm0 18.15a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3.1.82.83-3.03-.2-.31a8.23 8.23 0 1 1 6.97 3.85Zm4.52-6.16c-.25-.12-1.47-.72-1.7-.8-.23-.09-.4-.13-.56.12-.17.25-.64.8-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.38-1.72-.15-.25-.02-.38.11-.5.11-.11.25-.29.37-.44.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43h-.48a.92.92 0 0 0-.67.31c-.23.25-.87.85-.87 2.08s.9 2.41 1.02 2.58c.12.17 1.76 2.69 4.27 3.77.6.26 1.06.41 1.42.53.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.2-.58.2-1.08.14-1.18-.06-.1-.23-.17-.48-.29Z"/></svg>
+        Chamar no WhatsApp
+      </a>
+      <a class="btn" href="https://www.instagram.com/juniior_mello_/" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+        Instagram
+      </a>
+      <a class="btn" id="tiktok" aria-disabled="true">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-2.59-2.59c.27 0 .53.04.77.12V9.77a5.7 5.7 0 1 0 4.91 5.63V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3a4.3 4.3 0 0 1-3.24-1.48Z"/></svg>
+        TikTok <small>em breve</small>
+      </a>
+      <a class="btn" href="https://www.google.com/maps/search/?api=1&query=BYD+Parvi+Av.+Ayrton+Senna+da+Silva+800+Piedade+Jaboat%C3%A3o+dos+Guararapes+PE" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        Como chegar
+      </a>
+      <button class="btn" id="vcard" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="M19 3v6M16 6h6"/></svg>
+        Salvar contato
+      </button>
+    </nav>
+    <div class="phone-line"><span id="phone-txt">+55 81 97119-8776</span><button class="copy" id="copy" type="button">Copiar número</button></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="section" aria-labelledby="cat-title">
+    <div class="sec-head">
+      <div>
+        <h2 id="cat-title">Catálogo BYD</h2>
+        <p>Toque num modelo para ver a ficha técnica.</p>
+      </div>
+      <label class="search" for="q">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Buscar modelo" autocomplete="off">
+      </label>
+    </div>
+    <div class="chips" role="group" aria-label="Filtrar" id="chips"></div>
+    <div class="grid" id="grid"></div>
+    <p class="note">Ficha técnica de referência. Os valores podem variar por versão e ano-modelo. Preços, versões, cores e condições de pagamento: fale comigo no WhatsApp.</p>
+  </section>
+
+  <section class="visit" aria-labelledby="visit-title">
+    <div>
+      <h2 id="visit-title">Venha fazer um test drive</h2>
+      <p>BYD Parvi · Av. Ayrton Senna da Silva, 800 · Piedade, Jaboatão dos Guararapes, PE</p>
+    </div>
+    <a id="wa-td" href="#" target="_blank" rel="noopener">Agendar test drive</a>
+  </section>
+</main>
+
+<footer>Claudionor Junior · Gerente de Negócios BYD Parvi</footer>
+
+<dialog id="sheet" aria-labelledby="sheet-title">
+  <div class="sheet">
+    <div class="sheet-head">
+      <button class="close" id="close" type="button" aria-label="Fechar">×</button>
+      <span class="badge" id="sheet-badge"></span>
+      <div id="sheet-art"></div>
+      <h3 id="sheet-title"></h3>
+      <p id="sheet-cat"></p>
+    </div>
+    <div class="sheet-body">
+      <p class="pitch" id="sheet-pitch"></p>
+      <table class="specs"><tbody id="sheet-specs"></tbody></table>
+      <p class="note">Valores de referência. Confirme a versão e o ano-modelo comigo.</p>
+    </div>
+    <div class="sheet-foot">
+      <a class="btn wa" id="sheet-wa" href="#" target="_blank" rel="noopener">Tenho interesse neste carro</a>
+      <div class="row">
+        <a class="btn ghost" id="sheet-td" href="#" target="_blank" rel="noopener">Test drive</a>
+        <button class="btn ghost" id="sheet-share" type="button">Copiar link</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ============================================================
+   DADOS — edite aqui para atualizar o cartão e o catálogo
+   ============================================================ */
+const CONTATO = {
+  nome: "Claudionor Junior",
+  cargo: "Gerente de Negócios",
+  empresa: "BYD Parvi",
+  whatsapp: "5581971198776",
+  telefoneTexto: "+55 81 97119-8776",
+  instagram: "https://www.instagram.com/juniior_mello_/",
+  tiktok: "", // cole aqui o link do TikTok, ex.: https://www.tiktok.com/@seuperfil
+  endereco: "Av. Ayrton Senna da Silva, 800, Piedade, Jaboatão dos Guararapes, PE"
+};
+
+/* tipo: "ev" (100% elétrico) | "phev" (híbrido plug-in DM-i)
+   forma: "hatch" | "sedan" | "suv" | "pickup"
+   kpis: os 3 números do card. specs: linhas da ficha técnica. */
+const CARROS = [
+  { id:"dolphin-mini", nome:"BYD Dolphin Mini", tipo:"ev", forma:"hatch", cat:"Hatch compacto",
+    pitch:"O elétrico ideal para o dia a dia na cidade: fácil de estacionar e barato de rodar.",
+    kpis:[["75 cv","potência"],["280 km","autonomia"],["38 kWh","bateria"]],
+    specs:[["Motorização","100% elétrico"],["Potência","75 cv"],["Torque","135 Nm"],["Bateria","38 kWh (Blade)"],["Autonomia","até 280 km (PBEV)"],["Velocidade máxima","130 km/h"],["Porta-malas","230 L"],["Tração","Dianteira"]]},
+  { id:"dolphin", nome:"BYD Dolphin", tipo:"ev", forma:"hatch", cat:"Hatch médio",
+    pitch:"Espaço interno de carro maior, acabamento caprichado e central multimídia giratória.",
+    kpis:[["95 cv","potência"],["291 km","autonomia"],["44,9 kWh","bateria"]],
+    specs:[["Motorização","100% elétrico"],["Potência","95 cv"],["Torque","180 Nm"],["Bateria","44,9 kWh (Blade)"],["Autonomia","até 291 km (PBEV)"],["Velocidade máxima","150 km/h"],["Porta-malas","345 L"],["Tração","Dianteira"],["Lugares","5"]]},
+  { id:"dolphin-gs", nome:"BYD Dolphin GS", tipo:"ev", forma:"hatch", cat:"Hatch médio esportivo",
+    pitch:"A versão mais forte do Dolphin, com bateria maior e respostas de esportivo.",
+    kpis:[["204 cv","potência"],["7,0 s","0–100 km/h"],["60,5 kWh","bateria"]],
+    specs:[["Motorização","100% elétrico"],["Potência","204 cv"],["Torque","310 Nm"],["Bateria","60,48 kWh (Blade)"],["0–100 km/h","7,0 s"],["Velocidade máxima","160 km/h"],["Porta-malas","345 L"],["Tração","Dianteira"],["Lugares","5"]]},
+  { id:"yuan-pro", nome:"BYD Yuan Pro", tipo:"ev", forma:"suv", cat:"SUV compacto",
+    pitch:"SUV elétrico de entrada, com posição de dirigir alta e porta-malas para a família.",
+    kpis:[["177 cv","potência"],["250 km","autonomia"],["50 kWh","bateria"]],
+    specs:[["Motorização","100% elétrico"],["Potência","177 cv"],["Torque","290 Nm"],["Bateria","50,1 kWh (Blade)"],["Autonomia","até 250 km (PBEV)"],["Tração","Dianteira"],["Lugares","5"]]},
+  { id:"yuan-plus", nome:"BYD Yuan Plus", tipo:"ev", forma:"suv", cat:"SUV médio",
+    pitch:"Um dos SUVs elétricos mais vendidos do Brasil: espaço, tecnologia e desempenho.",
+    kpis:[["204 cv","potência"],["294 km","autonomia"],["7,3 s","0–100 km/h"]],
+    specs:[["Motorização","100% elétrico"],["Potência","204 cv"],["Torque","310 Nm"],["Bateria","60,48 kWh (Blade)"],["Autonomia","até 294 km (PBEV)"],["0–100 km/h","7,3 s"],["Velocidade máxima","160 km/h"],["Porta-malas","440 L"],["Tração","Dianteira"],["Lugares","5"]]},
+  { id:"seal", nome:"BYD Seal", tipo:"ev", forma:"sedan", cat:"Sedã esportivo",
+    pitch:"Sedã elétrico de alto desempenho, com tração integral e aceleração de superesportivo.",
+    kpis:[["531 cv","potência"],["3,8 s","0–100 km/h"],["372 km","autonomia"]],
+    specs:[["Motorização","100% elétrico, 2 motores"],["Potência","531 cv"],["Torque","670 Nm"],["Bateria","82,5 kWh (Blade)"],["Autonomia","até 372 km (PBEV)"],["0–100 km/h","3,8 s"],["Velocidade máxima","180 km/h"],["Tração","Integral (AWD)"],["Lugares","5"]]},
+  { id:"song-pro", nome:"BYD Song Pro DM-i", tipo:"phev", forma:"suv", cat:"SUV médio híbrido plug-in",
+    pitch:"Roda no elétrico no dia a dia e usa o motor a combustão nas viagens. Sem ansiedade de autonomia.",
+    kpis:[["Híbrido","plug-in"],["5","lugares"],["FWD","tração"]],
+    specs:[["Motorização","Híbrido plug-in DM-i (1.5 + elétrico)"],["Uso","Modo 100% elétrico na cidade"],["Recarga","Na tomada ou em carregador"],["Tração","Dianteira"],["Lugares","5"]]},
+  { id:"song-plus", nome:"BYD Song Plus DM-i", tipo:"phev", forma:"suv", cat:"SUV médio-grande híbrido plug-in",
+    pitch:"SUV espaçoso e confortável, com consumo baixíssimo e grande autonomia combinada.",
+    kpis:[["Híbrido","plug-in"],["18,3 kWh","bateria"],["5","lugares"]],
+    specs:[["Motorização","Híbrido plug-in DM-i (1.5 + elétrico)"],["Bateria","18,3 kWh (Blade)"],["Uso","Modo 100% elétrico na cidade"],["Tração","Dianteira"],["Lugares","5"]]},
+  { id:"seal-u", nome:"BYD Seal U DM-i", tipo:"phev", forma:"suv", cat:"SUV médio híbrido plug-in",
+    pitch:"SUV híbrido com visual moderno, muito espaço interno e pacote completo de tecnologia.",
+    kpis:[["324 cv","potência"],["Híbrido","plug-in"],["5","lugares"]],
+    specs:[["Motorização","Híbrido plug-in DM-i"],["Potência combinada","324 cv"],["Bateria","18,3 kWh (Blade)"],["Lugares","5"]]},
+  { id:"king", nome:"BYD King DM-i", tipo:"phev", forma:"sedan", cat:"Sedã médio híbrido plug-in",
+    pitch:"Sedã híbrido econômico, com muito espaço para quem roda bastante.",
+    kpis:[["Híbrido","plug-in"],["5","lugares"],["FWD","tração"]],
+    specs:[["Motorização","Híbrido plug-in DM-i (1.5 + elétrico)"],["Uso","Modo 100% elétrico na cidade"],["Tração","Dianteira"],["Lugares","5"]]},
+  { id:"shark", nome:"BYD Shark", tipo:"phev", forma:"pickup", cat:"Picape média híbrida plug-in",
+    pitch:"Picape híbrida 4x4 com força de sobra para trabalho e lazer.",
+    kpis:[["437 cv","potência"],["650 Nm","torque"],["5,7 s","0–100 km/h"]],
+    specs:[["Motorização","Híbrido plug-in DMO (1.5 turbo + 2 elétricos)"],["Potência combinada","437 cv"],["Torque combinado","650 Nm"],["Bateria","29,58 kWh (Blade)"],["0–100 km/h","5,7 s"],["Tração","Integral 4x4"],["Lugares","5"]]},
+  { id:"tan", nome:"BYD Tan EV", tipo:"ev", forma:"suv", cat:"SUV grande de 7 lugares",
+    pitch:"SUV elétrico de luxo para a família toda, com 7 lugares e tração integral.",
+    kpis:[["517 cv","potência"],["4,6 s","0–100 km/h"],["7","lugares"]],
+    specs:[["Motorização","100% elétrico, 2 motores"],["Potência","517 cv"],["Torque","700 Nm"],["Bateria","108,8 kWh (Blade)"],["0–100 km/h","4,6 s"],["Tração","Integral (AWD)"],["Lugares","7"]]},
+  { id:"han", nome:"BYD Han EV", tipo:"ev", forma:"sedan", cat:"Sedã grande de luxo",
+    pitch:"O sedã topo de linha da BYD: luxo, silêncio e desempenho de esportivo.",
+    kpis:[["517 cv","potência"],["3,9 s","0–100 km/h"],["AWD","tração"]],
+    specs:[["Motorização","100% elétrico, 2 motores"],["Potência","517 cv"],["Torque","700 Nm"],["Bateria","85,4 kWh (Blade)"],["0–100 km/h","3,9 s"],["Tração","Integral (AWD)"],["Lugares","5"]]}
+];
+
+/* ============================================================ */
+const SIL = {
+  hatch:'<svg viewBox="0 0 240 90" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 66h12m40 0h88m40 0h30c4 0 6-3 6-6V50c0-5-3-8-8-9l-24-5-30-20c-6-4-12-6-20-6H82c-9 0-15 3-21 9L44 36l-20 4c-7 2-10 6-10 12v14"/><path d="M68 36l14-16c3-3 6-4 10-4h28v20Z" opacity=".55"/><path d="M128 16h12c7 0 12 2 17 6l17 14h-46Z" opacity=".55"/><circle cx="46" cy="66" r="14"/><circle cx="174" cy="66" r="14"/></svg>',
+  sedan:'<svg viewBox="0 0 240 90" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 64h18m38 0h98m38 0h22c5 0 8-3 8-7v-6c0-4-2-7-6-8l-30-6-30-18c-6-3-12-5-20-5H96c-10 0-18 3-26 8L50 36l-28 6c-7 2-12 6-12 13v9"/><path d="M76 36l16-14c4-3 9-5 14-5h22v19Z" opacity=".55"/><path d="M136 17h6c7 0 13 2 19 6l17 13h-42Z" opacity=".55"/><circle cx="47" cy="64" r="14"/><circle cx="183" cy="64" r="14"/></svg>',
+  suv:'<svg viewBox="0 0 240 90" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 68h14m42 0h88m42 0h26c4 0 6-3 6-6V46c0-5-3-8-8-9l-22-4-26-20c-5-4-10-5-17-5H74c-8 0-13 2-18 7L40 32l-20 3c-6 1-8 5-8 10v23"/><path d="M60 32l14-14c3-3 6-4 10-4h36v18Z" opacity=".55"/><path d="M128 14h18c6 0 10 1 14 5l16 13h-48Z" opacity=".55"/><circle cx="47" cy="68" r="15"/><circle cx="177" cy="68" r="15"/></svg>',
+  pickup:'<svg viewBox="0 0 240 90" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 68h16m42 0h92m42 0h24c4 0 6-3 6-6V40h-84V30l-22-16c-4-3-9-4-15-4H76c-7 0-12 2-16 6L44 32l-24 4c-6 1-10 5-10 11v21"/><path d="M62 32l13-13c3-3 6-4 10-4h20v17Z" opacity=".55"/><path d="M112 15h10c5 0 9 1 12 4l14 13h-36Z" opacity=".55"/><path d="M148 40v12" opacity=".55"/><circle cx="47" cy="68" r="15"/><circle cx="181" cy="68" r="15"/></svg>'
+};
+const FILTROS = [
+  ["todos","Todos", ()=>true],
+  ["ev","100% elétricos", c=>c.tipo==="ev"],
+  ["phev","Híbridos plug-in", c=>c.tipo==="phev"],
+  ["suv","SUVs", c=>c.forma==="suv"],
+  ["sedan","Sedãs", c=>c.forma==="sedan"],
+  ["hatch","Hatches", c=>c.forma==="hatch"],
+  ["pickup","Picape", c=>c.forma==="pickup"]
+];
+const TIPO = {ev:["100% elétrico","ev"], phev:["Híbrido plug-in","phev"]};
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+const wa = msg => `https://wa.me/${CONTATO.whatsapp}?text=${encodeURIComponent(msg)}`;
+
+$("#wa-main").href = wa(`Olá, ${CONTATO.nome.split(" ")[1] || "Junior"}! Vim pelo seu cartão digital e gostaria de mais informações sobre os carros BYD.`);
+$("#wa-td").href = wa("Olá, Junior! Vim pelo seu cartão digital e quero agendar um test drive na BYD Parvi.");
+if (CONTATO.tiktok){
+  const t = $("#tiktok");
+  t.href = CONTATO.tiktok; t.target = "_blank"; t.rel = "noopener";
+  t.removeAttribute("aria-disabled"); t.querySelector("small").remove();
+}
+
+let filtro = "todos", busca = "";
+function renderChips(){
+  $("#chips").innerHTML = FILTROS.map(([id,label]) =>
+    `<button class="chip" type="button" data-f="${id}" aria-pressed="${id===filtro}">${label}</button>`).join("");
+}
+function renderGrid(){
+  const fn = FILTROS.find(f=>f[0]===filtro)[2];
+  const q = busca.trim().toLowerCase();
+  const lista = CARROS.filter(c => fn(c) && (!q || (c.nome+" "+c.cat).toLowerCase().includes(q)));
+  $("#grid").innerHTML = lista.length ? lista.map(c => `
+    <button class="car" type="button" data-id="${c.id}" aria-label="Ver ficha técnica do ${esc(c.nome)}">
+      <div class="art"><span class="badge ${TIPO[c.tipo][1]}">${TIPO[c.tipo][0]}</span>${SIL[c.forma]}</div>
+      <div class="body">
+        <h3>${esc(c.nome)}</h3>
+        <p class="cat">${esc(c.cat)}</p>
+        <div class="kpis">${c.kpis.map(([v,l])=>`<div class="kpi"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join("")}</div>
+        <span class="more">Ver ficha técnica →</span>
+      </div>
+    </button>`).join("") : `<p class="empty">Nenhum modelo encontrado. Tente outro nome ou filtro.</p>`;
+}
+$("#chips").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if(!b) return;
+  filtro = b.dataset.f; renderChips(); renderGrid();
+});
+$("#q").addEventListener("input", e => { busca = e.target.value; renderGrid(); });
+$("#grid").addEventListener("click", e => {
+  const b = e.target.closest(".car"); if(!b) return;
+  location.hash = b.dataset.id;
+});
+
+const dlg = $("#sheet");
+function abrir(id){
+  const c = CARROS.find(x=>x.id===id); if(!c) return;
+  $("#sheet-badge").className = "badge " + TIPO[c.tipo][1];
+  $("#sheet-badge").textContent = TIPO[c.tipo][0];
+  $("#sheet-art").innerHTML = SIL[c.forma].replace("<svg ", '<svg class="car-art" ');
+  $("#sheet-title").textContent = c.nome;
+  $("#sheet-cat").textContent = c.cat;
+  $("#sheet-pitch").textContent = c.pitch;
+  $("#sheet-specs").innerHTML = c.specs.map(([k,v])=>`<tr><th scope="row">${esc(k)}</th><td>${esc(v)}</td></tr>`).join("");
+  $("#sheet-wa").href = wa(`Olá, Junior! Vi o ${c.nome} no seu cartão digital e tenho interesse. Pode me passar preço e condições?`);
+  $("#sheet-td").href = wa(`Olá, Junior! Quero agendar um test drive do ${c.nome} na BYD Parvi.`);
+  if(!dlg.open) dlg.showModal();
+  $(".sheet-body").scrollTop = 0;
+}
+function fechar(){ if(dlg.open) dlg.close(); }
+dlg.addEventListener("close", () => { if(location.hash) history.replaceState(null,"",location.pathname+location.search); });
+dlg.addEventListener("click", e => { if(e.target === dlg) fechar(); });
+$("#close").addEventListener("click", fechar);
+function rota(){ const id = location.hash.slice(1); id ? abrir(id) : fechar(); }
+window.addEventListener("hashchange", rota);
+
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>t.hidden=true,2200); }
+async function copiar(txt, ok){
+  try{ await navigator.clipboard.writeText(txt); toast(ok); }
+  catch{ toast("Não foi possível copiar. Selecione o texto e copie."); }
+}
+$("#copy").addEventListener("click", () => copiar(CONTATO.telefoneTexto, "Número copiado"));
+$("#sheet-share").addEventListener("click", () => copiar(location.href, "Link do modelo copiado"));
+
+$("#vcard").addEventListener("click", () => {
+  const v = ["BEGIN:VCARD","VERSION:3.0",`FN:${CONTATO.nome}`,"N:Junior;Claudionor;;;",
+    `ORG:${CONTATO.empresa}`,`TITLE:${CONTATO.cargo}`,`TEL;TYPE=CELL:+${CONTATO.whatsapp}`,
+    `URL:${CONTATO.instagram}`,`ADR;TYPE=WORK:;;${CONTATO.endereco};;;;Brasil`,"END:VCARD"].join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([v],{type:"text/vcard"}));
+  a.download = "Claudionor-Junior-BYD.vcf";
+  document.body.appendChild(a); a.click(); a.remove();
+  toast("Contato gerado. Abra o arquivo para salvar.");
+});
+
+renderChips(); renderGrid(); rota();
+</script>
